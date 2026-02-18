@@ -20,12 +20,21 @@ export default function Gallery() {
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Piece | null>(null);
+  const [content, setContent] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch("/data/pieces.json")
       .then((r) => r.json())
       .then(setPieces)
       .catch(() => setPieces([]));
+    fetch("/api/content")
+      .then((r) => r.json())
+      .then((data: { id: string; value: string }[]) => {
+        const map: Record<string, string> = {};
+        for (const item of data) map[item.id] = item.value;
+        setContent(map);
+      })
+      .catch(() => {});
   }, []);
 
   const filtered = filter === "all" ? pieces : pieces.filter((p) => p.category === filter);
@@ -35,10 +44,10 @@ export default function Gallery() {
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         {/* Header */}
         <div className="mb-16">
-          <p className="text-warm-gray text-sm tracking-[0.3em] uppercase mb-3">Collection</p>
-          <h1 className="font-serif text-5xl lg:text-6xl font-light mb-6">Gallery</h1>
+          <p className="text-warm-gray text-sm tracking-[0.3em] uppercase mb-3">{content.gallery_subtitle || "Collection"}</p>
+          <h1 className="font-serif text-5xl lg:text-6xl font-light mb-6">{content.gallery_heading || "Gallery"}</h1>
           <p className="text-warm-gray font-light text-lg max-w-xl">
-            Each piece carries a story — of the clay, the glaze, and the moment it all came together (or didn&apos;t).
+            {content.gallery_intro || "Each piece carries a story — of the clay, the glaze, and the moment it all came together (or didn\u2019t)."}
           </p>
         </div>
 

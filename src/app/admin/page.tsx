@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import ContentEditor from "@/components/ContentEditor";
 
 const CLAY_TYPES = ["stoneware", "porcelain", "earthenware", "terracotta", "raku"];
 const TECHNIQUES = ["wheel throwing", "hand building", "coiling", "slab building", "pinching", "sculpting", "trimming", "carving", "other"];
@@ -16,7 +17,7 @@ export default function Admin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [activeTab, setActiveTab] = useState<"piece" | "logbook">("piece");
+  const [activeTab, setActiveTab] = useState<"piece" | "logbook" | "content">("piece");
 
   // === Piece form state ===
   const [uploading, setUploading] = useState(false);
@@ -82,16 +83,26 @@ export default function Admin() {
     if (!file) return;
     setPreview(URL.createObjectURL(file));
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-    const data = await res.json();
-    setUploading(false);
-    if (data.success) setImagePath(data.path);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      setUploading(false);
+      if (data.success) {
+        setImagePath(data.path);
+      } else {
+        setError(`Upload failed: ${data.error || "Unknown error"}`);
+      }
+    } catch (err) {
+      setUploading(false);
+      setError(`Upload failed: ${err instanceof Error ? err.message : "Network error"}`);
+    }
   };
 
   const submitPiece = async (e: React.FormEvent) => {
@@ -214,12 +225,12 @@ export default function Admin() {
 
         {/* Tabs */}
         <div className="flex gap-1 mb-10 border-b border-clay-light/30">
-          {(["piece", "logbook"] as const).map((tab) => (
+          {(["piece", "logbook", "content"] as const).map((tab) => (
             <button key={tab} onClick={() => { setActiveTab(tab); setError(""); setSuccess(""); }}
               className={`px-6 py-3 text-sm tracking-[0.2em] uppercase transition-colors border-b-2 -mb-px ${
                 activeTab === tab ? "border-terracotta text-charcoal" : "border-transparent text-warm-gray hover:text-charcoal"
               }`}>
-              {tab === "piece" ? "Add Piece" : "Log Session"}
+              {tab === "piece" ? "Add Piece" : tab === "logbook" ? "Log Session" : "Content"}
             </button>
           ))}
         </div>
@@ -481,6 +492,11 @@ export default function Admin() {
               Save Log Entry
             </button>
           </form>
+        )}
+
+        {/* === CONTENT TAB === */}
+        {activeTab === "content" && (
+          <ContentEditor token={token} />
         )}
       </div>
     </div>

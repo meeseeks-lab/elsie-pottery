@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import LogbookClient from "./LogbookClient";
+import { getContent, c } from "@/lib/content";
 
 export interface LogEntry {
   id: string;
@@ -41,18 +42,19 @@ async function getEntries(): Promise<LogEntry[]> {
   }
 }
 
+export const revalidate = 60;
+
 export default async function LogbookPage() {
-  const entries = await getEntries();
+  const [entries, content] = await Promise.all([getEntries(), getContent()]);
 
   return (
     <div className="pt-24 lg:pt-32 pb-16">
       <div className="max-w-4xl mx-auto px-6 lg:px-12">
         <div className="mb-16">
-          <p className="text-warm-gray text-sm tracking-[0.3em] uppercase mb-3">Studio</p>
-          <h1 className="font-serif text-5xl lg:text-6xl font-light mb-6">Logbook</h1>
+          <p className="text-warm-gray text-sm tracking-[0.3em] uppercase mb-3">{c(content, "logbook_subtitle")}</p>
+          <h1 className="font-serif text-5xl lg:text-6xl font-light mb-6">{c(content, "logbook_heading")}</h1>
           <p className="text-warm-gray font-light text-lg max-w-xl">
-            Every session tells a story. Clay temperatures, glaze experiments, 
-            and the quiet moments at the wheel.
+            {c(content, "logbook_intro")}
           </p>
         </div>
 

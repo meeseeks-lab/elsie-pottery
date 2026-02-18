@@ -1,6 +1,12 @@
 import Image from "next/image";
+import { getContent, c } from "@/lib/content";
 
-export default function About() {
+export const revalidate = 60;
+
+export default async function About() {
+  const content = await getContent();
+  const bioParagraphs = c(content, "about_bio").split("\n\n").filter(Boolean);
+
   return (
     <div className="pt-24 lg:pt-32 pb-16">
       <div className="max-w-5xl mx-auto px-6 lg:px-12">
@@ -8,9 +14,9 @@ export default function About() {
         <div className="mb-16 lg:mb-24">
           <p className="text-warm-gray text-sm tracking-[0.3em] uppercase mb-3">About</p>
           <h1 className="font-serif text-5xl lg:text-6xl font-light mb-8">
-            Not a potter.
+            {c(content, "about_heading")}
             <br />
-            <span className="italic text-terracotta">A student of clay.</span>
+            <span className="italic text-terracotta">{c(content, "about_heading_accent")}</span>
           </h1>
         </div>
 
@@ -19,7 +25,7 @@ export default function About() {
           <div className="lg:col-span-2">
             <div className="relative aspect-[3/4] rounded-sm overflow-hidden bg-cream-dark">
               <Image
-                src="/uploads/lavender-vase.jpg"
+                src={c(content, "about_photo")}
                 alt="Elsie's pottery"
                 fill
                 className="object-cover"
@@ -31,28 +37,9 @@ export default function About() {
           {/* Story */}
           <div className="lg:col-span-3 space-y-8">
             <div className="space-y-6 text-warm-gray font-light text-lg leading-relaxed">
-              <p>
-                I moved to Barcelona in 2020, carrying a suitcase and an overwhelming need to make 
-                something with my hands. For years I&apos;d worked in front of screens, and the city — 
-                with its warmth, its light, its <em>slow mornings</em> — felt like permission to try 
-                something different.
-              </p>
-              <p>
-                I walked into a ceramics studio in El Born on a whim. The teacher placed a lump of 
-                clay on the wheel and said, <em>&ldquo;Don&apos;t think about the bowl. Think about your 
-                breathing.&rdquo;</em> I haven&apos;t stopped since.
-              </p>
-              <p>
-                Three years in, I&apos;m still very much a beginner. My pieces are imperfect — 
-                wobbly rims, unexpected glaze runs, the occasional crack that shows up after the 
-                kiln cools. But that&apos;s the point, isn&apos;t it? The Japanese call it <em>wabi-sabi</em>: 
-                beauty in imperfection, in the incomplete, in the impermanent.
-              </p>
-              <p>
-                This isn&apos;t a shop. Nothing here is for sale. This is just a quiet corner of the 
-                internet where I share what I&apos;m learning — the process, the failures, the 
-                occasional piece that makes me smile.
-              </p>
+              {bioParagraphs.map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
             </div>
 
             <div className="w-12 h-px bg-terracotta" />
@@ -60,10 +47,7 @@ export default function About() {
             <div className="space-y-4">
               <h3 className="font-serif text-2xl">The studio</h3>
               <p className="text-warm-gray font-light leading-relaxed">
-                I share a community studio in Poble Sec with a handful of other hobbyists. 
-                We have two electric kilns, a few wheels, and a shelf of experimental glazes 
-                that nobody takes credit for. On good days, the light comes through the window 
-                and everything looks like it belongs in a still life.
+                {c(content, "about_studio")}
               </p>
             </div>
 
