@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
-
-const DATA_FILE = path.join(process.cwd(), "public", "data", "pieces.json");
-
-async function getPieces() {
-  try {
-    const data = await fs.readFile(DATA_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export async function GET() {
-  const pieces = await getPieces();
-  return NextResponse.json(pieces);
+  const { data, error } = await supabase
+    .from("elsie_pieces")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  
+  // Map image_url to image for frontend compatibility
+  const mapped = (data || []).map((p: Record<string, unknown>) => ({
+    ...p,
+    image: p.image_url,
+  }));
+  return NextResponse.json(mapped);
 }
 
 export async function POST(req: NextRequest) {
@@ -23,12 +22,20 @@ export async function POST(req: NextRequest) {
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const piece = await req.json();
-  const pieces = await getPieces();
-  
-  piece.id = `${piece.category}-${Date.now()}`;
-  piece.date = piece.date || new Date().toISOString().split("T")[0];
-  pieces.unshift(piece);
-  
-  await fs.writeFile(DATA_FILE, JSON.stringify(pieces, null, 2));
-  return NextResponse.json({ success: true, piece });
+
+  const { data, error } = await supabaseAdmin
+    .from("elsie_pieces")
+    .insert({
+      title: piece.title,
+      description: piece.description,
+      category: piece.category,
+      status: piece.status,
+      date: piece.date || new Date().toISOString().split("T")[0],
+      image_url: piece.image_url || piece.image,
+    })
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true, piece: data });
 }
