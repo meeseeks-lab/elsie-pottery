@@ -11,6 +11,7 @@ export default function Navigation() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/gallery", label: "Gallery" },
+    { href: "/logbook", label: "Logbook" },
     { href: "/journal", label: "Journal" },
     { href: "/about", label: "About" },
   ];
