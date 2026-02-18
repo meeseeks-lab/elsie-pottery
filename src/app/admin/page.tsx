@@ -172,7 +172,7 @@ export default function Admin() {
     }
   };
 
-  const inputClass = "w-full px-4 py-3 bg-cream-dark border border-clay-light/30 text-charcoal placeholder:text-warm-gray/50 focus:outline-none focus:border-terracotta text-sm";
+  const inputClass = "w-full max-w-full px-4 py-3 bg-cream-dark border border-clay-light/30 text-charcoal placeholder:text-warm-gray/50 focus:outline-none focus:border-terracotta text-sm box-border";
   const labelClass = "block text-sm tracking-[0.15em] uppercase text-warm-gray mb-2";
   const sectionTitle = (text: string) => (
     <div className="mt-8 mb-4 flex items-center gap-3">
@@ -206,7 +206,7 @@ export default function Admin() {
 
   return (
     <div className="pt-28 lg:pt-36 pb-16">
-      <div className="max-w-2xl mx-auto px-6 lg:px-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-12 overflow-hidden">
         <div className="mb-8">
           <p className="text-warm-gray text-sm tracking-[0.3em] uppercase mb-3">Studio</p>
           <h1 className="font-serif text-4xl lg:text-5xl font-light">Admin</h1>
